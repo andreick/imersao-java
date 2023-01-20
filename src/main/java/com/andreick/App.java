@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.URL;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -29,12 +30,20 @@ public class App {
 
         var movies = parseMoviesJson(response.body());
 
-        movies.forEach(movieMap -> {
-            System.out.println(movieMap.get("title"));
-            System.out.println(movieMap.get("image"));
-            System.out.println(movieMap.get("imDbRating"));
-            System.out.println();
-        });
+        var drawer = new MovieRatingDrawer();
+
+        int limit = Math.min(movies.size(), 10);
+
+        for (int i = 0; i < limit; i++) {
+            var movieMap = movies.get(i);
+
+            String image = movieMap.get("image").replace("_V1_UX128_CR0,12,128,176_AL_.", "");
+            String title = movieMap.get("title");
+            String rating = movieMap.get("imDbRating");
+
+            var imageStream = new URL(image).openStream();
+            drawer.saveImage(imageStream, title, rating);
+        }
     }
 
     public static List<Map<String, String>> parseMoviesJson(String moviesJson) throws IOException {
