@@ -1,15 +1,17 @@
 package com.andreick;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 
 public class App {
 
@@ -37,50 +39,12 @@ public class App {
 
     public static List<Map<String, String>> parseMoviesJson(String moviesJson) throws IOException {
 
-        List<Map<String, String>> movies = new ArrayList<>();
+        var objMapper = new ObjectMapper();
 
-        try (JsonParser jParser = new JsonFactory().createParser(moviesJson)) {
+        JsonNode rootNode = objMapper.readTree(moviesJson);
+        JsonNode itemsNode = rootNode.path("items");
 
-            if (jParser.nextToken() != JsonToken.START_OBJECT) {
-                throw new IllegalStateException("Token expected to be a start object");
-            }
-
-            while (jParser.nextToken() != JsonToken.END_OBJECT) {
-
-                String field = jParser.getCurrentName();
-
-                if ("items".equals(field)) {
-
-                    if (jParser.nextToken() != JsonToken.START_ARRAY) {
-                        throw new IllegalStateException("Token expected to be a start array");
-                    }
-
-                    while (jParser.nextToken() != JsonToken.END_ARRAY) {
-
-                        Map<String, String> movieMap = new HashMap<>();
-
-                        while (jParser.nextToken() != JsonToken.END_OBJECT) {
-
-                            String movieField = jParser.getCurrentName();
-                            jParser.nextToken(); // Move to value token
-
-                            switch (movieField) {
-                                case "title":
-                                case "image":
-                                case "imDbRating":
-                                    movieMap.put(movieField, jParser.getText());
-                                    break;
-                            }
-                        }
-
-                        movies.add(movieMap);
-                    }
-
-                    break;
-                }
-            }
-        }
-
-        return movies;
+        return objMapper.readValue(itemsNode.traverse(), new TypeReference<>() {
+        });
     }
 }
