@@ -1,50 +1,29 @@
 package com.andreick;
 
+import com.andreick.api.imdb.ImdbApi;
 import com.andreick.model.MovieDto;
-import com.andreick.util.ImageFileHandler;
-import com.andreick.util.ImageTextDrawer;
-import com.andreick.util.Resources;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.andreick.util.image.ImageFileHandler;
+import com.andreick.util.image.ImageTextDrawer;
 
 import java.awt.image.RenderedImage;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
 import java.net.URL;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.util.List;
-import java.util.Properties;
 
 public class App {
 
-    public static void main(String[] args) throws IOException, InterruptedException {
+    public static void main(String[] args) {
 
-        var imdbProps = new Properties();
-        InputStream imdbPropsStream = Resources.getResourceAsStream("imdb-api.properties");
-        imdbProps.load(imdbPropsStream);
+        ImdbApi imdbApi = new ImdbApi();
+        List<MovieDto> top250Movies = imdbApi.getTop250Movies();
 
-        var uri = URI.create("https://imdb-api.com/en/API/Top250Movies/" + imdbProps.getProperty("key"));
-
-        var httpClient = HttpClient.newHttpClient();
-        var request = HttpRequest.newBuilder(uri).GET().build();
-        var response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-
-        List<MovieDto> movies = parseMoviesJson(response.body());
-
-        var drawer = new ImageTextDrawer();
-        var fileHandler = new ImageFileHandler();
-
-        movies.stream()
-                .limit(Math.min(movies.size(), 10))
-                .forEach(movie -> saveMovieImage(movie, drawer, fileHandler));
+        top250Movies.stream()
+                .limit(Math.min(top250Movies.size(), 10))
+                .forEach(App::saveMovieImage);
     }
 
-    private static void saveMovieImage(MovieDto movie, ImageTextDrawer drawer, ImageFileHandler fileHandler) {
+    private static void saveMovieImage(MovieDto movie) {
         InputStream imageStream;
         try {
             imageStream = new URL(movie.getImageUrl()).openStream();
@@ -54,19 +33,7 @@ public class App {
 
         String text = "Rating: " + movie.getRating();
 
-        RenderedImage newImage = drawer.drawText(imageStream, text);
-        fileHandler.saveImage(newImage, movie.getTitle());
-    }
-
-    public static List<MovieDto> parseMoviesJson(String moviesJson) throws IOException {
-
-        var objMapper = new ObjectMapper();
-        objMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
-        JsonNode rootNode = objMapper.readTree(moviesJson);
-        JsonNode itemsNode = rootNode.path("items");
-
-        return objMapper.readValue(itemsNode.traverse(), new TypeReference<>() {
-        });
+        RenderedImage newImage = ImageTextDrawer.drawText(imageStream, text);
+        ImageFileHandler.saveImage(newImage, movie.getTitle());
     }
 }

@@ -1,4 +1,4 @@
-package com.andreick.util;
+package com.andreick.util.image;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -21,7 +21,7 @@ public class ImageTextDrawer {
         return inputImage;
     }
 
-    public RenderedImage drawText(InputStream inputStream, String text) {
+    public static RenderedImage drawText(InputStream inputStream, String text) {
 
         BufferedImage inputImage = toBufferedImage(inputStream);
 

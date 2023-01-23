@@ -1,4 +1,4 @@
-package com.andreick.util;
+package com.andreick.util.image;
 
 import javax.imageio.ImageIO;
 import java.awt.image.RenderedImage;
@@ -8,7 +8,7 @@ import java.nio.file.Paths;
 
 public class ImageFileHandler {
 
-    public void saveImage(RenderedImage image, String fileName) {
+    public static void saveImage(RenderedImage image, String fileName) {
         try {
             var imagesPath = Paths.get("images");
 
