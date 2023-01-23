@@ -1,4 +1,4 @@
-package com.andreick;
+package com.andreick.util;
 
 import java.io.InputStream;
 

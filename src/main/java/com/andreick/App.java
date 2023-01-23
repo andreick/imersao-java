@@ -1,11 +1,15 @@
 package com.andreick;
 
 import com.andreick.model.MovieDto;
+import com.andreick.util.ImageFileHandler;
+import com.andreick.util.ImageTextDrawer;
+import com.andreick.util.Resources;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.awt.image.RenderedImage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -32,15 +36,26 @@ public class App {
 
         List<MovieDto> movies = parseMoviesJson(response.body());
 
-        var drawer = new MovieRatingDrawer();
+        var drawer = new ImageTextDrawer();
+        var fileHandler = new ImageFileHandler();
 
-        int limit = Math.min(movies.size(), 10);
+        movies.stream()
+                .limit(Math.min(movies.size(), 10))
+                .forEach(movie -> saveMovieImage(movie, drawer, fileHandler));
+    }
 
-        for (int i = 0; i < limit; i++) {
-            MovieDto movie = movies.get(i);
-            var imageStream = new URL(movie.getImageUrl()).openStream();
-            drawer.saveImage(imageStream, movie.getTitle(), movie.getRating());
+    private static void saveMovieImage(MovieDto movie, ImageTextDrawer drawer, ImageFileHandler fileHandler) {
+        InputStream imageStream;
+        try {
+            imageStream = new URL(movie.getImageUrl()).openStream();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
+
+        String text = "Rating: " + movie.getRating();
+
+        RenderedImage newImage = drawer.drawText(imageStream, text);
+        fileHandler.saveImage(newImage, movie.getTitle());
     }
 
     public static List<MovieDto> parseMoviesJson(String moviesJson) throws IOException {
