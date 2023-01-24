@@ -14,11 +14,10 @@ public class ApiClient {
         this.httpClient = HttpClient.newHttpClient();
     }
 
-    public String getBody(URI uri) {
+    public HttpResponse<String> getResponse(URI uri) {
         try {
             var request = HttpRequest.newBuilder(uri).GET().build();
-            var response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-            return response.body();
+            return httpClient.send(request, HttpResponse.BodyHandlers.ofString());
         } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);
         }

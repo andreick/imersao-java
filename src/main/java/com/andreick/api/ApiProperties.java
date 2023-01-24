@@ -1,4 +1,4 @@
-package com.andreick.api.imdb;
+package com.andreick.api;
 
 import com.andreick.util.Resources;
 
@@ -6,13 +6,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
-public class ImdbProperties {
+public class ApiProperties {
 
-    private static final String PROPERTIES_NAME = "imdb-api.properties";
+    private static final String PROPERTIES_NAME = "api.properties";
 
     private final Properties properties;
 
-    public ImdbProperties() {
+    public ApiProperties() {
         this.properties = new Properties();
         InputStream stream = Resources.getResourceAsStream(PROPERTIES_NAME);
         try {
@@ -22,7 +22,7 @@ public class ImdbProperties {
         }
     }
 
-    public String getKey() {
-        return properties.getProperty("key");
+    public String getKey(String name) {
+        return properties.getProperty("key." + name);
     }
 }
