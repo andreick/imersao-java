@@ -23,6 +23,6 @@ public class ImdbImageContentExtractor implements ImageContentExtractor {
                     String text = "IMDb rating: " + movie.getRating();
                     return new ImageContent(movie.getTitle(), url, text);
                 })
-                .collect(Collectors.toList());
+                .collect(Collectors.toUnmodifiableList());
     }
 }

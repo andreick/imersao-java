@@ -6,6 +6,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.util.Collections;
 import java.util.List;
 
 public class NasaJsonParser {
@@ -21,8 +22,9 @@ public class NasaJsonParser {
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
         try {
-            return objectMapper.readValue(json, new TypeReference<>() {
+            List<ApodDto> apods = objectMapper.readValue(json, new TypeReference<>() {
             });
+            return Collections.unmodifiableList(apods);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }

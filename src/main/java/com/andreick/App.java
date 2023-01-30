@@ -14,26 +14,29 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
-import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class App {
 
     public static void main(String[] args) {
 
         var nasaApi = new NasaApi();
-        String apodsInRange = nasaApi.getApodsInRange(LocalDate.now().minus(2, ChronoUnit.DAYS));
+        String apodsInRange = nasaApi.getApodsInRange(LocalDate.now().minusDays(2));
 
         ImageContentExtractor extractor = new NasaImageContentExtractor();
-        List<ImageContent> contents = extractor.extract(apodsInRange);
+        var apods = extractor.extract(apodsInRange);
 
         var imdbApi = new ImdbApi();
         String top250Movies = imdbApi.getTop250Movies();
 
         extractor = new ImdbImageContentExtractor();
-        contents.addAll(extractor.extract(top250Movies));
+        var movies = extractor.extract(top250Movies);
+        
+        var images = Stream.concat(apods.stream(), movies.stream())
+                .collect(Collectors.toUnmodifiableList());
 
-        contents.stream()
+        images.stream()
                 .limit(10)
                 .forEach(App::saveContent);
     }

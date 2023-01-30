@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 
 public class ImdbJsonParser {
@@ -25,8 +26,9 @@ public class ImdbJsonParser {
             JsonNode rootNode = objectMapper.readTree(moviesJson);
             JsonNode itemsNode = rootNode.path("items");
 
-            return objectMapper.readValue(itemsNode.traverse(), new TypeReference<>() {
+            List<MovieDto> movies = objectMapper.readValue(itemsNode.traverse(), new TypeReference<>() {
             });
+            return Collections.unmodifiableList(movies);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

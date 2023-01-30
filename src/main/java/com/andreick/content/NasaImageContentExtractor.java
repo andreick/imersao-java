@@ -19,6 +19,6 @@ public class NasaImageContentExtractor implements ImageContentExtractor {
         return parser.parseApods(json)
                 .stream()
                 .map(apod -> new ImageContent(apod.getTitle(), apod.getUrl(), apod.getTitle()))
-                .collect(Collectors.toList());
+                .collect(Collectors.toUnmodifiableList());
     }
 }
